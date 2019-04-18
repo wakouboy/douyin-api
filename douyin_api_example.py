@@ -10,6 +10,7 @@ Created on 2019/4/14 9:29 PM
 
 import json
 import random
+import re
 import time
 import warnings
 from urllib.parse import urlencode
@@ -46,6 +47,16 @@ def joint_url(url, params):
     return url + separator + params
 
 
+def filter_common_params(url):
+    """
+    删除冗余的参数
+    :param url: 抖音接口
+    :return: 删除冗余参数后的接口
+    """
+    url = re.sub('(ts=[^&]+&?|_rticket=[^&]+&?|as=[^&]+&?|cp=[^&]+&?|mas=[^&]+&?|mcc_mnc=[^&]+&?|ac=[^&]+&?|channel=[^&]+&?|aid=[^&]+&?|app_name=[^&]+&?|version_code=[^&]+&?|version_name=[^&]+&?|device_platform=[^&]+&?|ssmix=[^&]+&?|device_type=[^&]+&?|device_brand=[^&]+&?|language=[^&]+&?|os_api=[^&]+&?|os_version=[^&]+&?|manifest_version_code=[^&]+&?|resolution=[^&]+&?|dpi=[^&]+&?|update_version_code=[^&]+&?|retry_type=[^&]+&?|js_sdk_version=[^&]+&?)', '', url).rstrip('&')
+    return url
+
+
 def encrypy_url(url):
     """
     获取有效的地址
@@ -53,6 +64,7 @@ def encrypy_url(url):
 
     device_params = get_device_params()
     url = joint_url(url, device_params)
+    url = filter_common_params(url)
 
     params = {
         'url': url,
@@ -193,6 +205,16 @@ def get_following_list(user_id, max_time, cookies):
     return douyin_get(douyin_url, cookies)
 
 
+def get_hot_search():
+    """
+    获取热搜榜
+    :return: json
+    """
+
+    douyin_url = 'https://api.amemv.com/aweme/v1/hotsearch/positive_energy/billboard/?ts=1555571688&js_sdk_version=1.13.10&app_type=normal&os_api=25&device_platform=android&device_type=Redmi%205A&iid=69281070982&ssmix=a&manifest_version_code=580&dpi=320&uuid=865990032676740&version_code=580&app_name=aweme&version_name=5.8.0&openudid=4a5a6ac011d51959&device_id=67022866585&resolution=720*1280&os_version=7.1.2&language=zh&device_brand=Xiaomi&ac=wifi&update_version_code=5800&aid=1128&channel=xiaomi&_rticket=1555571689138&mcc_mnc=46001&as=a125f2db988edc73684444&cp=2ee0cc5f8c89bb39e1KcSg&mas=01c311550aaa51179cdb18c34c2bc69f932c2c2c2c1c6cccecc626'
+    return douyin_get(douyin_url)
+
+
 if __name__ == '__main__':
     cookies = get_cookies()
     print(cookies)
@@ -226,4 +248,7 @@ if __name__ == '__main__':
 
     user_id = '107776778033'
     data = get_following_list(user_id, max_time=int(time.time()), cookies=cookies)
+    print(data)
+
+    data = get_hot_search()
     print(data)
