@@ -61,6 +61,6 @@
 
 ## 联系方式
 
-**email**: bzkj@bzkj@tech
+**email**: bzkj@bzk.tech
 
 **wechat**: bzkj_tech
