@@ -20,7 +20,8 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-SERVICE_URL = 'http://bzkj.tech:2117/douyin/encrypt_url'
+SERVICE_URL = 'http://bzkj.tech:2117/douyin/'
+SECRET_KEY = 'iM0hCLU0fZc885zfkFPX3UJwSHbYyam9ji0WglnT3fc='  # 密钥
 
 HEADERS = {
     'User-Agent': 'com.ss.android.ugc.aweme/390 (Linux; U; Android 7.1.2; zh_CN; Redmi 5A; Build/N2G47H; Cronet/58.0.2991.0)'
@@ -57,6 +58,26 @@ def filter_common_params(url):
     return url
 
 
+def encrypt_phonenumber(phonenumber):
+    """
+    加密phonenumber
+    :param phonenumber: +86xxxxxxxxxxx
+    :return: 密文
+    """
+    params = {
+        'phonenumber': phonenumber,
+        'secret_key': SECRET_KEY  # 密钥
+    }
+
+    res = requests.get(SERVICE_URL + 'encrypt_phonenumber', params=params)
+    data = res.json()
+    if data.get('code') != 200:
+        raise Exception(data.get('msg'))
+    phonenumber = data.get('data').get('phonenumber')
+
+    return phonenumber
+
+
 def encrypy_url(url):
     """
     获取有效的地址
@@ -68,10 +89,10 @@ def encrypy_url(url):
 
     params = {
         'url': url,
-        'secret_key': 'iM0hCLU0fZc885zfkFPX3UJwSHbYyam9ji0WglnT3fc='  # 密钥
+        'secret_key': SECRET_KEY  # 密钥
     }
 
-    res = requests.get(SERVICE_URL, params=params)
+    res = requests.get(SERVICE_URL + 'encrypt_url', params=params)
     data = res.json()
     if data.get('code') != 200:
         raise Exception(data.get('msg'))
@@ -216,6 +237,9 @@ def get_hot_search():
 
 
 if __name__ == '__main__':
+    phonenumber = encrypt_phonenumber('+8613812983563')  # 电话号为随意填写的，非本人点话，请勿拨打
+    print(phonenumber)
+
     cookies = get_cookies()
     print(cookies)
 
