@@ -54,15 +54,15 @@ def filter_common_params(url):
     :param url: 抖音接口
     :return: 删除冗余参数后的接口
     """
-    url = re.sub('(ts=[^&]+&?|_rticket=[^&]+&?|as=[^&]+&?|cp=[^&]+&?|mas=[^&]+&?|mcc_mnc=[^&]+&?|ac=[^&]+&?|channel=[^&]+&?|aid=[^&]+&?|app_name=[^&]+&?|version_code=[^&]+&?|version_name=[^&]+&?|device_platform=[^&]+&?|ssmix=[^&]+&?|device_type=[^&]+&?|device_brand=[^&]+&?|language=[^&]+&?|os_api=[^&]+&?|os_version=[^&]+&?|manifest_version_code=[^&]+&?|resolution=[^&]+&?|dpi=[^&]+&?|update_version_code=[^&]+&?|retry_type=[^&]+&?|js_sdk_version=[^&]+&?)', '', url).rstrip('&')
+    url = re.sub('(device_id=[^&]+&?|iid=[^&]+&?|uuid=[^&]+&?|openudid=[^&]+&?|ts=[^&]+&?|_rticket=[^&]+&?|as=[^&]+&?|cp=[^&]+&?|mas=[^&]+&?|mcc_mnc=[^&]+&?|ac=[^&]+&?|channel=[^&]+&?|aid=[^&]+&?|app_name=[^&]+&?|version_code=[^&]+&?|version_name=[^&]+&?|device_platform=[^&]+&?|ssmix=[^&]+&?|device_type=[^&]+&?|device_brand=[^&]+&?|language=[^&]+&?|os_api=[^&]+&?|os_version=[^&]+&?|manifest_version_code=[^&]+&?|resolution=[^&]+&?|dpi=[^&]+&?|update_version_code=[^&]+&?|retry_type=[^&]+&?|js_sdk_version=[^&]+&?)', '', url).rstrip('&')
     return url
 
 
 def encrypt_phonenumber(phonenumber):
     """
-    加密phonenumber
-    :param phonenumber: +86xxxxxxxxxxx
-    :return: 密文
+    加密 phonenumber
+    :param phonenumber: 登陆电话号 如 +86xxxxxxxxxxx
+    :return: 加密后的参数
     """
     params = {
         'phonenumber': phonenumber,
@@ -71,11 +71,57 @@ def encrypt_phonenumber(phonenumber):
 
     res = requests.get(SERVICE_URL + 'encrypt_phonenumber', params=params)
     data = res.json()
+    res.close()
     if data.get('code') != 200:
         raise Exception(data.get('msg'))
+
     phonenumber = data.get('data').get('phonenumber')
 
     return phonenumber
+
+
+def encrypt_password(password):
+    """
+    加密 password
+    :param password: 密码
+    :return: 加密后的参数
+    """
+    params = {
+        'password': password,
+        'secret_key': SECRET_KEY  # 密钥
+    }
+
+    res = requests.get(SERVICE_URL + 'encrypt_password', params=params)
+    data = res.json()
+    res.close()
+    if data.get('code') != 200:
+        raise Exception(data.get('msg'))
+
+    password = data.get('data').get('password')
+
+    return password
+
+
+def encrypt_code(code):
+    """
+    加密 code
+    :param code: 短信验证码
+    :return: 加密后的参数
+    """
+    params = {
+        'code': code,
+        'secret_key': SECRET_KEY  # 密钥
+    }
+
+    res = requests.get(SERVICE_URL + 'encrypt_code', params=params)
+    data = res.json()
+    res.close()
+    if data.get('code') != 200:
+        raise Exception(data.get('msg'))
+
+    code = data.get('data').get('code')
+
+    return code
 
 
 def encrypy_url(url):
@@ -83,9 +129,9 @@ def encrypy_url(url):
     获取有效的地址
     """
 
+    url = filter_common_params(url)
     device_params = get_device_params()
     url = joint_url(url, device_params)
-    url = filter_common_params(url)
 
     params = {
         'url': url,
@@ -94,8 +140,10 @@ def encrypy_url(url):
 
     res = requests.get(SERVICE_URL + 'encrypt_url', params=params)
     data = res.json()
+    res.close()
     if data.get('code') != 200:
         raise Exception(data.get('msg'))
+
     url = data.get('data').get('url')
 
     return url
@@ -236,9 +284,15 @@ def get_hot_search():
     return douyin_get(douyin_url)
 
 
-if __name__ == '__main__':
-    phonenumber = encrypt_phonenumber('+8613812983563')  # 电话号为随意填写的，非本人电话，请勿拨打
+def test():
+    phonenumber = encrypt_phonenumber('+86xxxxxxxxxxx')
     print(phonenumber)
+
+    password = encrypt_password('fdfdfdfdfds')
+    print(password)
+
+    code = encrypt_code('4842')
+    print(code)
 
     cookies = get_cookies()
     print(cookies)
@@ -276,3 +330,7 @@ if __name__ == '__main__':
 
     data = get_hot_search()
     print(data)
+
+
+if __name__ == '__main__':
+    test()
