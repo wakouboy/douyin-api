@@ -284,6 +284,49 @@ def get_hot_search():
     return douyin_get(douyin_url)
 
 
+def send_sms_code(phonenumber):
+    """
+    发送短信验证码
+    :param phonenumber: 电话号 需要带有区号
+    :return:
+    """
+    phonenumber = encrypt_phonenumber(phonenumber)
+    # 发送验证码
+    url = 'https://iu-hl.snssdk.com/passport/mobile/send_code/v1/?version_code=5.7.0&pass-region=1&pass-route=1&js_sdk_version=1.13.0.0&app_name=aweme&vid=4B8B6700-84B3-4145-8754-2A36F701E89B&app_version=5.7.0&device_id=41157622170&channel=App%20Store&mcc_mnc=46000&aid=1128&screen_width=1242&openudid=b47e5096544c383cee9510ccd6261fa2e86c7591&os_api=18&ac=WIFI&os_version=12.2&device_platform=iphone&build_number=57010&device_type=iPhone9,2&iid=68982672879&idfa=D2E02B97-0F35-486F-9CD4-A2EC13BBC8FB&type=3731&mobile={}&mix_mode=1&mas=01f70dc3a53dfdf3341379593942ce90da3e6af08760dc60ec6f3e&as=a2456e2b70a63c837d5385&ts=1555948384'.format(phonenumber)
+    data = douyin_get(url)
+    if data.get('message') == 'success':
+        print('发送验证码成功')
+    elif data.get('data').get('error_code') == 1104:
+        raise Exception('需要打验证码')
+        # 打码 TODO
+    else:
+        raise Exception(data)
+
+
+def login_with_sms_code(phonenumber, code):
+    """
+    使用短信验证码登陆
+    :param phonenumber: 电话号
+    :param code: 短信验证码
+    :return: (data, cookies)
+    """
+    phonenumber = encrypt_phonenumber(phonenumber)
+    code = encrypt_code(code)
+
+    url = 'https://iu-hl.snssdk.com/passport/mobile/sms_login/?version_code=5.7.0&pass-region=1&pass-route=1&js_sdk_version=1.13.0.0&app_name=aweme&vid=4B8B6700-84B3-4145-8754-2A36F701E89B&app_version=5.7.0&device_id=41157622170&channel=App%20Store&mcc_mnc=46000&aid=1128&screen_width=1242&openudid=b47e5096544c383cee9510ccd6261fa2e86c7591&os_api=18&ac=WIFI&os_version=12.2&device_platform=iphone&build_number=57010&device_type=iPhone9,2&iid=68982672879&idfa=D2E02B97-0F35-486F-9CD4-A2EC13BBC8FB&code={}&mix_mode=1&mobile={}&mas=016ff8a5bb025f33c0983d4ce542d86b648a072e329299549f5281&as=a245de6b83f74cc39d2539&ts=1555948403'.format(code, phonenumber)
+    url = encrypy_url(url)
+
+    response = requests.get(url, headers=HEADERS, verify=False)
+    data = response.json()
+    cookies = response.cookies.get_dict()
+    response.close()
+
+    if data.get('message') == 'success':
+        return data, cookies
+    else:
+        raise Exception(data)
+
+
 def test():
     phonenumber = encrypt_phonenumber('+86xxxxxxxxxxx')
     print(phonenumber)
@@ -293,6 +336,12 @@ def test():
 
     code = encrypt_code('4842')
     print(code)
+
+    # 此处需填写电话号 短信验证码
+    # send_sms_code("+86xxxxxxxxxxx")
+    # data, logined_cookies = login_with_sms_code("+86xxxxxxxxxxxx", "5776")
+    # print(data)
+    # print(logined_cookies)
 
     cookies = get_cookies()
     print(cookies)
