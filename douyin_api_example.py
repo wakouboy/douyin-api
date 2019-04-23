@@ -170,7 +170,7 @@ def get_cookies():
     warnings.warn('获取cookie中，推荐当获取到的cookie用redis缓存起来，做成cookie池。一个进程负责生产cookie，保持一定数量的cookies。 爬虫负责使用，cookie失效删除')
     douyin_url = 'https://api.amemv.com/aweme/v1/feed/?type=0&max_cursor=0&min_cursor=-1&count=6&volume=0.0&pull_type=2&need_relieve_aweme=0&filter_warn=0&req_from&is_cold_start=0'
     url = encrypy_url(douyin_url)
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, verify=False)
     cookies = response.cookies.get_dict()
     response.close()
 
@@ -284,27 +284,31 @@ def get_hot_search():
     return douyin_get(douyin_url)
 
 
-def search_user(keyword, cursor=0, proxies=None):
+def search_user(keyword, cursor=0, proxies=None, cookies=None):
     """
-    搜索用户
+    搜索用户 不登陆时请求次数有限制，偶尔返回数据偶尔没有数据，次数可传递proxies 多试几次；或者直接携带登陆后的cookie
     :param keyword: 关键词
     :param cursor: 翻页的偏移量 每次叠加20
+    :param proxies: 代理 {'https':'https://xxx.xxx.xxx.xxx:xxxx'}
+    :param cookies: 登陆后的cookie
     :return:
     """
     douyin_url = 'https://aweme-hl.snssdk.com/aweme/v1/discover/search/?version_code=5.7.0&pass-region=1&pass-route=1&js_sdk_version=1.13.0.0&app_name=aweme&vid=4B8B6700-84B3-4145-8754-2A36F701E89B&app_version=5.7.0&device_id=41157622170&channel=App%20Store&mcc_mnc=46000&aid=1128&screen_width=1242&openudid=b47e5096544c383cee9510ccd6261fa2e86c7591&os_api=18&ac=WIFI&os_version=12.2&device_platform=iphone&build_number=57010&device_type=iPhone9,2&iid=68982672879&idfa=D2E02B97-0F35-486F-9CD4-A2EC13BBC8FB&cursor={cursor}&is_pull_refresh=1&search_source=discover&query_correct_type=1&count=20&keyword={keyword}&hot_search=0&type=1&mas=0128c70dbcb0ae55a31de383217033d9717db5dd1cb801e802dcf8&as=a295774b74e58c71ee1948&ts=1555984724'.format(keyword=keyword, cursor=cursor)
-    data = douyin_get(douyin_url, proxies=proxies)
+    data = douyin_get(douyin_url, proxies=proxies, cookies=cookies)
     return data
 
 
-def search_video(keyword, cursor=0, proxies=None):
+def search_video(keyword, cursor=0, proxies=None, cookies=None):
     """
-    搜索视频
+    搜索视频 不登陆时请求次数有限制，偶尔返回数据偶尔没有数据，次数可传递proxies 多试几次；或者直接携带登陆后的cookie
     :param keyword: 关键词
     :param cursor: 翻页的偏移量 每次叠加12
+    :param proxies: 代理 {'https':'https://xxx.xxx.xxx.xxx:xxxx'}
+    :param cookies: 登陆后的cookie
     :return:
     """
     douyin_url = 'https://aweme-hl.snssdk.com/aweme/v1/search/item/?version_code=5.7.0&pass-region=1&pass-route=1&js_sdk_version=1.13.0.0&app_name=aweme&vid=4B8B6700-84B3-4145-8754-2A36F701E89B&app_version=5.7.0&device_id=41157622170&channel=App%20Store&mcc_mnc=46000&aid=1128&screen_width=1242&openudid=b47e5096544c383cee9510ccd6261fa2e86c7591&os_api=18&ac=WIFI&os_version=12.2&device_platform=iphone&build_number=57010&device_type=iPhone9,2&iid=68982672879&idfa=D2E02B97-0F35-486F-9CD4-A2EC13BBC8FB&keyword={keyword}&query_correct_type=1&count=12&offset={cursor}&source=video_search&hot_search=0&mas=0144f6de2943232356d7e2a08b073a82a7a6b34cadaf0e69c744e8&as=a235b7abc63dfc342e2651&ts=1555985622'.format(keyword=keyword, cursor=cursor)
-    data = douyin_get(douyin_url, proxies=proxies)
+    data = douyin_get(douyin_url, proxies=proxies, cookies=cookies)
     return data
 
 
@@ -349,6 +353,24 @@ def login_with_sms_code(phonenumber, code):
         return data, cookies
     else:
         raise Exception(data)
+
+
+def get_call_count():
+    """
+    获取接口请求次数计总次数
+    :return: {'data': {'total_count': 20000, 'used_count': 2028}, 'code': 200, 'msg': '请求成功'}
+    """
+    params = {
+        'secret_key': SECRET_KEY  # 密钥
+    }
+
+    res = requests.get(SERVICE_URL + 'get_used_count', params=params)
+    data = res.json()
+    res.close()
+    if data.get('code') != 200:
+        raise Exception(data.get('msg'))
+
+    return data
 
 
 def test():
@@ -408,6 +430,9 @@ def test():
     print(data)
 
     data = search_video('美女', cursor=0)
+    print(data)
+
+    data = get_call_count()
     print(data)
 
 
