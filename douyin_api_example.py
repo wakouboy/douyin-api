@@ -149,13 +149,13 @@ def encrypy_url(url):
     return url
 
 
-def douyin_get(url, cookies=None):
+def douyin_get(url, cookies=None, proxies=None):
     """
     发请求
     """
 
     url = encrypy_url(url)
-    response = requests.get(url, headers=HEADERS, cookies=cookies, verify=False)
+    response = requests.get(url, headers=HEADERS, cookies=cookies, verify=False, proxies=proxies)
     data = response.json()
     response.close()
     return data
@@ -284,7 +284,7 @@ def get_hot_search():
     return douyin_get(douyin_url)
 
 
-def search_user(keyword, cursor=0):
+def search_user(keyword, cursor=0, proxies=None):
     """
     搜索用户
     :param keyword: 关键词
@@ -292,11 +292,11 @@ def search_user(keyword, cursor=0):
     :return:
     """
     douyin_url = 'https://aweme-hl.snssdk.com/aweme/v1/discover/search/?version_code=5.7.0&pass-region=1&pass-route=1&js_sdk_version=1.13.0.0&app_name=aweme&vid=4B8B6700-84B3-4145-8754-2A36F701E89B&app_version=5.7.0&device_id=41157622170&channel=App%20Store&mcc_mnc=46000&aid=1128&screen_width=1242&openudid=b47e5096544c383cee9510ccd6261fa2e86c7591&os_api=18&ac=WIFI&os_version=12.2&device_platform=iphone&build_number=57010&device_type=iPhone9,2&iid=68982672879&idfa=D2E02B97-0F35-486F-9CD4-A2EC13BBC8FB&cursor={cursor}&is_pull_refresh=1&search_source=discover&query_correct_type=1&count=20&keyword={keyword}&hot_search=0&type=1&mas=0128c70dbcb0ae55a31de383217033d9717db5dd1cb801e802dcf8&as=a295774b74e58c71ee1948&ts=1555984724'.format(keyword=keyword, cursor=cursor)
-    data = douyin_get(douyin_url)
+    data = douyin_get(douyin_url, proxies=proxies)
     return data
 
 
-def search_video(keyword, cursor=0):
+def search_video(keyword, cursor=0, proxies=None):
     """
     搜索视频
     :param keyword: 关键词
@@ -304,7 +304,7 @@ def search_video(keyword, cursor=0):
     :return:
     """
     douyin_url = 'https://aweme-hl.snssdk.com/aweme/v1/search/item/?version_code=5.7.0&pass-region=1&pass-route=1&js_sdk_version=1.13.0.0&app_name=aweme&vid=4B8B6700-84B3-4145-8754-2A36F701E89B&app_version=5.7.0&device_id=41157622170&channel=App%20Store&mcc_mnc=46000&aid=1128&screen_width=1242&openudid=b47e5096544c383cee9510ccd6261fa2e86c7591&os_api=18&ac=WIFI&os_version=12.2&device_platform=iphone&build_number=57010&device_type=iPhone9,2&iid=68982672879&idfa=D2E02B97-0F35-486F-9CD4-A2EC13BBC8FB&keyword={keyword}&query_correct_type=1&count=12&offset={cursor}&source=video_search&hot_search=0&mas=0144f6de2943232356d7e2a08b073a82a7a6b34cadaf0e69c744e8&as=a235b7abc63dfc342e2651&ts=1555985622'.format(keyword=keyword, cursor=cursor)
-    data = douyin_get(douyin_url)
+    data = douyin_get(douyin_url, proxies=proxies)
     return data
 
 
